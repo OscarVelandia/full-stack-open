@@ -2,8 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 
-const Header = () => {
-  const course = "Half Stack application development";
+const Header = props => {
+  const { course } = props.title;
 
   return (
     <>
@@ -12,30 +12,30 @@ const Header = () => {
   );
 };
 
-const Content = props => {
-  const part1 = "Fundamentals of React";
-  const part2 = "Using props to pass data";
-  const part3 = "State of a component";
-  const { exercises1, exercises2, exercises3 } = props;
-
+const Part = props => {
   return (
     <>
       <p>
-        {part1} {exercises1}
-      </p>
-      <p>
-        {part2} {exercises2}
-      </p>
-      <p>
-        {part3} {exercises3}
+        {props.part} {props.exercises}
       </p>
     </>
   );
 };
 
+const Content = props => {
+  const [part1, part2, part3] = props.exercises;
+
+  return (
+    <div>
+      <Part part={part1.name} exercises={part1.exercises} />
+      <Part part={part2.name} exercises={part2.exercises} />
+      <Part part={part3.name} exercises={part3.exercises} />
+    </div>
+  );
+};
+
 const Footer = props => {
-  const { exercises1, exercises2, exercises3 } = props;
-  console.log(props);
+  const { exercises1, exercises2, exercises3 } = props.exercises;
 
   return (
     <>
@@ -45,15 +45,35 @@ const Footer = props => {
 };
 
 const App = () => {
-  const exercises1 = 10;
-  const exercises2 = 7;
-  const exercises3 = 14;
+  const course = {
+    name: "Half Stack application development",
+    parts: [
+      {
+        name: "Fundamentals of React",
+        exercises: 10
+      },
+      {
+        name: "Using props to pass data",
+        exercises: 7
+      },
+      {
+        name: "State of a component",
+        exercises: 14
+      }
+    ]
+  };
 
   return (
     <div>
-      <Header />
-      <Content exercises={{exercises1, exercises1, exercises1}} />
-      <Footer exercises={{exercises1, exercises2, exercises3}} />
+      <Header title={course.name} />
+      <Content exercises={course.parts} />
+      <Footer
+        exercises={{
+          exercises1: course.parts[0].exercises,
+          exercises2: course.parts[1].exercises,
+          exercises3: course.parts[2].exercises
+        }}
+      />
     </div>
   );
 };
