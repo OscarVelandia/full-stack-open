@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 
@@ -63,8 +63,13 @@ const App = () => {
     ]
   };
 
+  const [counter, setCounter] = useState(0);
+
+  const increaseByOne = () => () => setCounter(counter + 1);
+
   return (
     <div>
+      <button onClick={increaseByOne()}>{counter}</button>
       <Header title={course.name} />
       <Content exercises={course.parts} />
       <Footer
