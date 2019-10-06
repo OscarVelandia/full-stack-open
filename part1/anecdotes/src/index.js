@@ -5,9 +5,18 @@ const Button = ({ onClick, text }) => {
   return <button onClick={onClick}>{text}</button>;
 };
 
+const Anecdote = ({ title, selected, votes }) => {
+  return (
+    <div>
+      <h1>{title}</h1>
+      <p>{selected}</p>
+      <p>Has {votes}</p>
+    </div>
+  );
+};
+
 const App = ({ anecdotes }) => {
-  const [selected, setSelected] = useState(0);
-  const [votes, setVotes] = useState(0);
+  const [indexSelected, setIndexSelected] = useState(0);
   const [indexMostVoted, setIndexMostVoted] = useState(null);
 
   const handleNextAnecdoteClick = () => {
@@ -15,36 +24,45 @@ const App = ({ anecdotes }) => {
       Math.random() * Math.floor(anecdotes.length)
     );
 
-    setSelected(indexSelectedAnecdote);
-    setVotes(anecdotes[indexSelectedAnecdote].votes);
+    setIndexSelected(indexSelectedAnecdote);
   };
 
   const handleVoteClick = () => {
-    setVotes((anecdotes[selected].votes += 1));
+    anecdotes = anecdotes.map((anecdote, idx) => {
+      return indexSelected === idx
+        ? { ...anecdote, votes: (anecdote.votes += 1) }
+        : anecdote;
+    });
+
     getMostVotedAnecdoteIndex();
   };
 
   const getMostVotedAnecdoteIndex = () => {
     const votes = anecdotes.map(item => item.votes);
     setIndexMostVoted(votes.indexOf(Math.max(...votes)));
+    console.log(anecdotes[indexSelected]);
   };
 
   return (
     <div>
-      <h1>Anecdote of the day</h1>
-      <p>{anecdotes[selected].data}</p>
-      <p>Has {votes}</p>
+      <Anecdote
+        title="Anecdote of the day"
+        selected={anecdotes[indexSelected].data}
+        votes={anecdotes[indexSelected].votes}
+      />
       <Button onClick={handleVoteClick} text="Vote" />
       <Button onClick={handleNextAnecdoteClick} text="next anecdote" />
-      {indexMostVoted !== null ? (
-        <div>
-          <h1>Anecdote with most votes</h1>
-          <p>{anecdotes[indexMostVoted].data}</p>
-          <p>Has {anecdotes[indexMostVoted].votes}</p>
-        </div>
-      ) : (
-        <p>No votes</p>
-      )}
+      <>
+        {indexMostVoted !== null ? (
+          <Anecdote
+            title="Anecdote with most votes"
+            selected={anecdotes[indexMostVoted].data}
+            votes={anecdotes[indexMostVoted].votes}
+          />
+        ) : (
+          <p>No votes {indexMostVoted}</p>
+        )}
+      </>
     </div>
   );
 };
