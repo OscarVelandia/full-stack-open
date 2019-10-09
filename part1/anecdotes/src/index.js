@@ -18,6 +18,7 @@ const Anecdote = ({ title, selected, votes }) => {
 const App = ({ anecdotes }) => {
   const [indexSelected, setIndexSelected] = useState(0);
   const [indexMostVoted, setIndexMostVoted] = useState(null);
+  const [modifiedAnecdotes, setAnecdotes] = useState(anecdotes);
 
   const handleNextAnecdoteClick = () => {
     const indexSelectedAnecdote = Math.floor(
@@ -28,27 +29,36 @@ const App = ({ anecdotes }) => {
   };
 
   const handleVoteClick = () => {
-    anecdotes = anecdotes.map((anecdote, idx) => {
-      return indexSelected === idx
-        ? { ...anecdote, votes: (anecdote.votes += 1) }
-        : anecdote;
-    });
+    setAnecdotes(
+      modifiedAnecdotes.map((anecdote, idx) => {
+        return indexSelected === idx
+          ? { ...anecdote, votes: (anecdote.votes += 1) }
+          : anecdote;
+      })
+    );
 
     getMostVotedAnecdoteIndex();
   };
 
   const getMostVotedAnecdoteIndex = () => {
-    const votes = anecdotes.map(item => item.votes);
-    setIndexMostVoted(votes.indexOf(Math.max(...votes)));
-    console.log(anecdotes[indexSelected]);
+    setIndexMostVoted(
+      modifiedAnecdotes.reduce(
+        (idxHighestNumber, anecdote, idx, anecdotesArray) => {
+          return anecdote.votes > anecdotesArray[idxHighestNumber].votes
+            ? idx
+            : idxHighestNumber;
+        },
+        0
+      )
+    );
   };
 
   return (
     <div>
       <Anecdote
         title="Anecdote of the day"
-        selected={anecdotes[indexSelected].data}
-        votes={anecdotes[indexSelected].votes}
+        selected={modifiedAnecdotes[indexSelected].data}
+        votes={modifiedAnecdotes[indexSelected].votes}
       />
       <Button onClick={handleVoteClick} text="Vote" />
       <Button onClick={handleNextAnecdoteClick} text="next anecdote" />
@@ -56,8 +66,8 @@ const App = ({ anecdotes }) => {
         {indexMostVoted !== null ? (
           <Anecdote
             title="Anecdote with most votes"
-            selected={anecdotes[indexMostVoted].data}
-            votes={anecdotes[indexMostVoted].votes}
+            selected={modifiedAnecdotes[indexMostVoted].data}
+            votes={modifiedAnecdotes[indexMostVoted].votes}
           />
         ) : (
           <p>No votes {indexMostVoted}</p>
