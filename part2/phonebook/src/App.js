@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+
+import {
+  getAllContacts,
+  createContact,
+  updateContact,
+  deleteContact
+} from "./service/contact";
 
 import AddUserForm from "./components/AddUserForm";
 import FilterForm from "./components/FilterForm";
@@ -12,7 +18,7 @@ const App = () => {
   const [newPhoneNumber, setNewPhoneNumber] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then(personsInfo => {
+    getAllContacts().then(personsInfo => {
       setPersonsToShow(personsInfo.data);
       setPersons(personsInfo.data);
     });
@@ -30,25 +36,35 @@ const App = () => {
         id: persons.length + 1
       };
 
-      setPersons(persons.concat(person));
-      setPersonsToShow(persons.concat(person));
-      setNewName("");
-      setNewPhoneNumber("");
+      createContact(person).then(person => {
+        setPersons(persons.concat(person));
+        setPersonsToShow(persons.concat(person));
+        setNewName("");
+        setNewPhoneNumber("");
+      });
+
       return;
     }
 
     window.alert(`${newName} is already added to phonebook.`);
   };
 
-  const filterByName = name => {
-    if (!name.length) {
-      setPersonsToShow(persons);
-      return;
-    }
+  // const modifyContact = () => {
+  //   updateContact;
+  // };
 
-    setPersonsToShow(
-      personsToShow.filter(person => person.name.includes(name))
-    );
+  const handleDeleteClick = selectedPersonId => {
+    const personToDelete = persons.filter(
+      person => person.id === selectedPersonId
+    )[0];
+
+    if (window.confirm(`Delete ${personToDelete.name}`)) {
+      setPersonsToShow(
+        personsToShow.filter(person => person.id !== selectedPersonId)
+      );
+
+      deleteContact(selectedPersonId, personToDelete);
+    }
   };
 
   const handleFilterChange = event => {
@@ -63,6 +79,17 @@ const App = () => {
     setNewPhoneNumber(event.target.value);
   };
 
+  const filterByName = name => {
+    if (!name.length) {
+      setPersonsToShow(persons);
+      return;
+    }
+
+    setPersonsToShow(
+      personsToShow.filter(person => person.name.includes(name))
+    );
+  };
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -73,7 +100,7 @@ const App = () => {
         onSubmit={addContact}
       />
       <h2>Numbers</h2>
-      <UserList users={personsToShow} />
+      <UserList onClick={handleDeleteClick} users={personsToShow} />
     </div>
   );
 };
