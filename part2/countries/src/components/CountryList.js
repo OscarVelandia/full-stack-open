@@ -22,7 +22,7 @@ const CountryList = ({ countries }) => {
           <React.Fragment key={country.alpha3Code}>
             <li>{country.name}</li>
             <button onClick={() => handleOpenDetailClick(idx)}>
-              Show details
+              {openDetail[idx] ? "Hidden details" : "Show details"}
             </button>
             {openDetail[idx] && <CountryListDetial country={country} />}
           </React.Fragment>
