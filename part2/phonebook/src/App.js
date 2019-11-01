@@ -28,30 +28,62 @@ const App = () => {
     event.preventDefault();
 
     const nameExist = persons.some(person => person.name === newName);
+    const updatePersonId = persons.reduce((acc, person) => {
+      return person.name === newName ? (acc = person.id) : acc;
+    }, 0);
+    const nameExistConfirm =
+      nameExist &&
+      window.confirm(
+        `${newName} is already added to phonebook, replace the old number with a new one?.`
+      );
+
+    const person = {
+      name: newName,
+      number: newPhoneNumber,
+      ...(!nameExist && { id: persons.length + 123 }),
+      ...(nameExist && { id: updatePersonId })
+    };
 
     if (!nameExist) {
-      const person = {
-        name: newName,
-        number: newPhoneNumber,
-        id: persons.length + 1
-      };
-
       createContact(person).then(person => {
-        setPersons(persons.concat(person));
-        setPersonsToShow(persons.concat(person));
-        setNewName("");
-        setNewPhoneNumber("");
+        createNewPerson(person);
       });
-
-      return;
     }
 
-    window.alert(`${newName} is already added to phonebook.`);
+    if (nameExist && nameExistConfirm) {
+      modifyContactPhoneNumber(person);
+    }
   };
 
-  // const modifyContact = () => {
-  //   updateContact;
-  // };
+  const modifyContactPhoneNumber = personData => {
+    const { id } = personData;
+
+    updateContact(id, personData).then(modifyPerson => {
+      updatePersonData(modifyPerson);
+    });
+  };
+
+  const updatePersonData = personData => {
+    const updatedPersons = persons.map(person => {
+      if (person.id === personData.id) {
+        return personData;
+      }
+
+      return person;
+    });
+
+    setPersons(updatedPersons);
+    setPersonsToShow(updatedPersons);
+    setNewName("");
+    setNewPhoneNumber("");
+  };
+
+  const createNewPerson = personData => {
+    setPersons(persons.concat(personData));
+    setPersonsToShow(persons.concat(personData));
+    setNewName("");
+    setNewPhoneNumber("");
+  };
 
   const handleDeleteClick = selectedPersonId => {
     const personToDelete = persons.filter(

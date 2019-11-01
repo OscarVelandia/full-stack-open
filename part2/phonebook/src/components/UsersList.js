@@ -1,15 +1,14 @@
 import React from "react";
+import "./UsersList.css";
 
 const UsersList = ({ users, onClick }) =>
-  users.map((person, idx) => (
-    <>
-      <p key={person.id}>
+  users.map(person => (
+    <div className="wrapper" key={person.id}>
+      <div>
         {person.name} - {person.number}
-      </p>
-      <button onClick={() => onClick(person.id)}>
-        Delete contact {person.id + 11}
-      </button>
-    </>
+      </div>
+      <button onClick={() => onClick(person.id)}>Delete contact</button>
+    </div>
   ));
 
 export default UsersList;
