@@ -10,10 +10,14 @@ import {
 import AddUserForm from "./components/AddUserForm";
 import FilterForm from "./components/FilterForm";
 import UserList from "./components/UsersList";
+import ErrorMessage from "./components/ErrorMessage";
+import SuccessMessage from "./components/SuccessMessage";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [personsToShow, setPersonsToShow] = useState([]);
+  const [personAlreadyDeleted, setpersonAlreadyDeleted] = useState(undefined);
+  const [lastAddedPersonName, setLastAddedPersonName] = useState(undefined);
   const [newName, setNewName] = useState("");
   const [newPhoneNumber, setNewPhoneNumber] = useState("");
 
@@ -22,7 +26,19 @@ const App = () => {
       setPersonsToShow(personsInfo.data);
       setPersons(personsInfo.data);
     });
-  }, []);
+  }, [personAlreadyDeleted]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setpersonAlreadyDeleted(undefined);
+    }, 5000);
+  }, [personAlreadyDeleted]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLastAddedPersonName(undefined);
+    }, 5000);
+  }, [personsToShow]);
 
   const addContact = event => {
     event.preventDefault();
@@ -40,7 +56,7 @@ const App = () => {
     const person = {
       name: newName,
       number: newPhoneNumber,
-      ...(!nameExist && { id: persons.length + 123 }),
+      ...(!nameExist && { id: persons.length + new Date().getTime() }),
       ...(nameExist && { id: updatePersonId })
     };
 
@@ -53,6 +69,17 @@ const App = () => {
     if (nameExist && nameExistConfirm) {
       modifyContactPhoneNumber(person);
     }
+  };
+
+  const filterByName = name => {
+    if (!name.length) {
+      setPersonsToShow(persons);
+      return;
+    }
+
+    setPersonsToShow(
+      personsToShow.filter(person => person.name.includes(name))
+    );
   };
 
   const modifyContactPhoneNumber = personData => {
@@ -79,23 +106,26 @@ const App = () => {
   };
 
   const createNewPerson = personData => {
+    setLastAddedPersonName(personData.name);
     setPersons(persons.concat(personData));
     setPersonsToShow(persons.concat(personData));
     setNewName("");
     setNewPhoneNumber("");
   };
 
-  const handleDeleteClick = selectedPersonId => {
+  const handleDeleteClick = (selectedPersonId, selectedPersonName) => {
     const personToDelete = persons.filter(
       person => person.id === selectedPersonId
     )[0];
 
     if (window.confirm(`Delete ${personToDelete.name}`)) {
-      setPersonsToShow(
-        personsToShow.filter(person => person.id !== selectedPersonId)
-      );
-
-      deleteContact(selectedPersonId, personToDelete);
+      deleteContact(selectedPersonId, personToDelete)
+        .then(_ => {
+          setPersonsToShow(
+            personsToShow.filter(person => person.id !== selectedPersonId)
+          );
+        })
+        .catch(_ => setpersonAlreadyDeleted(selectedPersonName));
     }
   };
 
@@ -111,20 +141,15 @@ const App = () => {
     setNewPhoneNumber(event.target.value);
   };
 
-  const filterByName = name => {
-    if (!name.length) {
-      setPersonsToShow(persons);
-      return;
-    }
-
-    setPersonsToShow(
-      personsToShow.filter(person => person.name.includes(name))
-    );
-  };
-
   return (
     <div>
       <h2>Phonebook</h2>
+      {personAlreadyDeleted && (
+        <ErrorMessage contactName={personAlreadyDeleted} />
+      )}
+      {lastAddedPersonName && (
+        <SuccessMessage contactName={lastAddedPersonName} />
+      )}
       <FilterForm onChange={handleFilterChange} />
       <AddUserForm
         value={{ newName, newPhoneNumber }}
